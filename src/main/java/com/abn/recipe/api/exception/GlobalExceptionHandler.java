@@ -1,5 +1,6 @@
 package com.abn.recipe.api.exception;
 
+import com.abn.recipe.domain.exception.RecipeNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;

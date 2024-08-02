@@ -1,7 +1,7 @@
 package com.abn.recipe.service;
 
 import com.abn.recipe.domain.model.RecipeSearch;
-import com.abn.recipe.api.exception.RecipeNotFoundException;
+import com.abn.recipe.domain.exception.RecipeNotFoundException;
 import com.abn.recipe.domain.mapper.RecipeAdapter;
 import com.abn.recipe.domain.model.Recipe;
 import com.abn.recipe.repository.RecipeEntity;

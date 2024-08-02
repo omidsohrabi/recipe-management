@@ -1,4 +1,4 @@
-package com.abn.recipe.api.exception;
+package com.abn.recipe.domain.exception;
 
 import lombok.Getter;
 
