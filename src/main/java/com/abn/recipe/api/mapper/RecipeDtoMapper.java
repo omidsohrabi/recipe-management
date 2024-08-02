@@ -1,5 +1,6 @@
 package com.abn.recipe.api.mapper;
 
+import com.abn.recipe.api.dto.CreateRecipeDto;
 import com.abn.recipe.api.dto.RecipeDto;
 import com.abn.recipe.api.dto.RecipeSearchDto;
 import com.abn.recipe.domain.model.Recipe;
@@ -19,14 +20,13 @@ public class RecipeDtoMapper {
                 .build();
     }
 
-    public Recipe toDomain(RecipeDto recipeDto) {
+    public Recipe toDomain(CreateRecipeDto createRecipeDto) {
         return Recipe.builder()
-                .id(recipeDto.getId())
-                .name(recipeDto.getName())
-                .vegetarian(recipeDto.isVegetarian())
-                .servings(recipeDto.getServings())
-                .ingredients(recipeDto.getIngredients())
-                .instructions(recipeDto.getInstructions())
+                .name(createRecipeDto.getName())
+                .vegetarian(createRecipeDto.isVegetarian())
+                .servings(createRecipeDto.getServings())
+                .ingredients(createRecipeDto.getIngredients())
+                .instructions(createRecipeDto.getInstructions())
                 .build();
     }
 
@@ -37,6 +37,7 @@ public class RecipeDtoMapper {
                 .servings(searchDto.getServings())
                 .includeIngredients(searchDto.getIncludeIngredients())
                 .excludeIngredients(searchDto.getExcludeIngredients())
+                .instructionText(searchDto.getInstructionText())
                 .build();
     }
 }

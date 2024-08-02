@@ -11,8 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class RecipeDto {
-    private Long id;
+public class CreateRecipeDto {
     @NotNull(message = "name cannot be null")
     private String name;
     private boolean vegetarian;
