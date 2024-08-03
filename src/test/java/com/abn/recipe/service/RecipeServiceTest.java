@@ -7,6 +7,7 @@ import com.abn.recipe.domain.model.Recipe;
 import com.abn.recipe.domain.model.RecipeSearch;
 import com.abn.recipe.repository.RecipeEntity;
 import com.abn.recipe.repository.RecipeRepository;
+import com.abn.recipe.repository.RecipeRepositoryCustom;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +36,9 @@ class RecipeServiceTest {
 
     @Mock
     private RecipeRepository recipeRepository;
+
+    @Mock
+    private RecipeRepositoryCustom recipeRepositoryCustom;
 
     @InjectMocks
     private RecipeService recipeService;
@@ -134,32 +138,58 @@ class RecipeServiceTest {
     void getAllRecipes_shouldReturnAllRecipes() {
         List<RecipeEntity> entities = new ArrayList<>();
         entities.add(sampleRecipeEntity);
-        Page<RecipeEntity> page = new PageImpl<>(entities);
-        when(recipeRepository.findAll(any(Pageable.class))).thenReturn(page);
+        Page<Long> page = new PageImpl<>(recipeIds);
+        when(recipeRepository.findRecipeIds(any(Pageable.class))).thenReturn(page);
+        when(recipeRepository.findByIdIn(recipeIds)).thenReturn(entities);
         when(recipeAdapter.toDomain(any(RecipeEntity.class))).thenReturn(sampleRecipe);
 
         List<Recipe> recipes = recipeService.getAllRecipes(Pageable.unpaged());
 
         assertEquals(1, recipes.size());
         assertEquals(sampleRecipe, recipes.get(0));
-        verify(recipeRepository).findAll(any(Pageable.class));
+        verify(recipeRepository).findRecipeIds(any(Pageable.class));
+        verify(recipeRepository).findByIdIn(recipeIds);
         verify(recipeAdapter).toDomain(sampleRecipeEntity);
+    }
+
+    @Test
+    void getAllRecipes_shouldReturnEmptyList() {
+        Page<Long> page = new PageImpl<>(List.of());
+        when(recipeRepository.findRecipeIds(any(Pageable.class))).thenReturn(page);
+
+        List<Recipe> recipes = recipeService.getAllRecipes(Pageable.unpaged());
+
+        assertEquals(0, recipes.size());
+        verify(recipeRepository).findRecipeIds(any(Pageable.class));
     }
 
     @Test
     void searchRecipes_shouldReturnFilteredRecipes() {
         List<RecipeEntity> entities = new ArrayList<>();
         entities.add(sampleRecipeEntity);
-        Page<RecipeEntity> page = new PageImpl<>(entities);
-        when(recipeRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        Page<Long> page = new PageImpl<>(recipeIds);
+        when(recipeRepositoryCustom.findRecipeIds(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(recipeRepository.findByIdIn(recipeIds)).thenReturn(entities);
         when(recipeAdapter.toDomain(any(RecipeEntity.class))).thenReturn(sampleRecipe);
 
         List<Recipe> recipes = recipeService.searchRecipes(sampleRecipeSearch, Pageable.unpaged());
 
         assertEquals(1, recipes.size());
         assertEquals(sampleRecipe, recipes.get(0));
-        verify(recipeRepository).findAll(any(Specification.class), any(Pageable.class));
+        verify(recipeRepositoryCustom).findRecipeIds(any(Specification.class), any(Pageable.class));
+        verify(recipeRepository).findByIdIn(recipeIds);
         verify(recipeAdapter).toDomain(sampleRecipeEntity);
+    }
+
+    @Test
+    void searchRecipes_shouldReturnEmptyList() {
+        Page<Long> page = new PageImpl<>(List.of());
+        when(recipeRepositoryCustom.findRecipeIds(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        List<Recipe> recipes = recipeService.searchRecipes(sampleRecipeSearch, Pageable.unpaged());
+
+        assertEquals(0, recipes.size());
+        verify(recipeRepositoryCustom).findRecipeIds(any(Specification.class), any(Pageable.class));
     }
 
     @Test
@@ -197,4 +227,6 @@ class RecipeServiceTest {
             .includeIngredients(List.of("Ingredient 1", "Ingredient 2"))
             .instructionText("Instructions")
             .build();
+
+    private final List<Long> recipeIds = List.of(1L, 2L, 3L);
 }

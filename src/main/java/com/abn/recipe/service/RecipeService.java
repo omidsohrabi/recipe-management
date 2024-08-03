@@ -8,8 +8,10 @@ import com.abn.recipe.domain.model.Recipe;
 import com.abn.recipe.repository.RecipeEntity;
 import com.abn.recipe.repository.RecipeEntity_;
 import com.abn.recipe.repository.RecipeRepository;
+import com.abn.recipe.repository.RecipeRepositoryCustom;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -22,10 +24,12 @@ import java.util.Optional;
 public class RecipeService {
     private final RecipeAdapter recipeAdapter;
     private final RecipeRepository recipeRepository;
+    private final RecipeRepositoryCustom recipeRepositoryCustom;
 
-    public RecipeService(RecipeAdapter recipeAdapter, RecipeRepository recipeRepository) {
+    public RecipeService(RecipeAdapter recipeAdapter, RecipeRepository recipeRepository, RecipeRepositoryCustom recipeRepositoryCustom) {
         this.recipeAdapter = recipeAdapter;
         this.recipeRepository = recipeRepository;
+        this.recipeRepositoryCustom = recipeRepositoryCustom;
     }
 
     @Transactional
@@ -67,11 +71,19 @@ public class RecipeService {
     }
 
     public List<Recipe> getAllRecipes(Pageable pageable) {
-        return recipeRepository.findAll(pageable).stream().map(recipeAdapter::toDomain).toList();
+        Page<Long> recipeIdsPage = recipeRepository.findRecipeIds(pageable);
+        if (recipeIdsPage.isEmpty()) {
+            return List.of();
+        }
+        return recipeRepository.findByIdIn(recipeIdsPage.getContent()).stream().map(recipeAdapter::toDomain).toList();
     }
 
     public List<Recipe> searchRecipes(RecipeSearch recipeSearch, Pageable pageable) {
-        return recipeRepository.findAll(createSearchQuery(recipeSearch), pageable).stream()
+        Page<Long> recipeIdsPage = recipeRepositoryCustom.findRecipeIds(createSearchQuery(recipeSearch), pageable);
+        if (recipeIdsPage.isEmpty()) {
+            return List.of();
+        }
+        return recipeRepository.findByIdIn(recipeIdsPage.getContent()).stream()
                 .map(recipeAdapter::toDomain)
                 .toList();
     }
