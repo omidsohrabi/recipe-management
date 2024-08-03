@@ -69,6 +69,10 @@ public class RecipeService {
                 .toList();
     }
 
+    public long countRecipes(RecipeSearch recipeSearch) {
+        return recipeRepository.count(createSearchQuery(recipeSearch));
+    }
+
     private static Specification<RecipeEntity> createSearchQuery(
             RecipeSearch recipeSearch) {
         return (root, query, criteriaBuilder) -> {

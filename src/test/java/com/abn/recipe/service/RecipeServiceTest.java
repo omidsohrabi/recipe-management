@@ -140,6 +140,16 @@ class RecipeServiceTest {
         verify(recipeAdapter).toDomain(sampleRecipeEntity);
     }
 
+    @Test
+    void countRecipes_shouldReturnNumberOfRecipes() {
+        when(recipeRepository.count(any(Specification.class))).thenReturn(10L);
+
+        Long count = recipeService.countRecipes(sampleRecipeSearch);
+
+        assertEquals(10, count);
+        verify(recipeRepository).count(any(Specification.class));
+    }
+
     private final RecipeEntity sampleRecipeEntity = RecipeEntity.builder()
             .id(1L)
             .name("Recipe")

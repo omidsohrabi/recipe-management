@@ -14,6 +14,4 @@ public class RecipeSearchDto {
     private List<String> includeIngredients;
     private List<String> excludeIngredients;
     private String instructionText;
-    private int page = 0;
-    private int size = 10;
 }

@@ -17,21 +17,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RecipeNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleRecipeNotFoundException(RecipeNotFoundException ex) {
         log.error(ex.getMessage());
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+        return buildResponse(HttpStatus.NOT_FOUND, ErrorCode.RECIPE_NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult().getAllErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
-        return buildResponse(HttpStatus.BAD_REQUEST, errors);
+        List<String> errors = ex.getBindingResult().getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList();
+        return buildResponse(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, errors);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        log.error(ex.getMessage());
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
-    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus httpStatus, Object error) {
-        return ResponseEntity.status(httpStatus).body(ErrorResponse.builder().error(error).build());
+    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus httpStatus, ErrorCode errorCode, Object error) {
+        return ResponseEntity.status(httpStatus).body(ErrorResponse.builder()
+                .errorCode(errorCode)
+                .errorDetails(error)
+                .build());
     }
 }

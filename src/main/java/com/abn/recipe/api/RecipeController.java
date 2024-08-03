@@ -1,6 +1,7 @@
 package com.abn.recipe.api;
 
 import com.abn.recipe.api.dto.CreateRecipeDto;
+import com.abn.recipe.api.dto.PageableRecipeSearchDto;
 import com.abn.recipe.api.dto.RecipeDto;
 import com.abn.recipe.api.dto.RecipeSearchDto;
 import com.abn.recipe.domain.model.RecipeSearch;
@@ -63,18 +64,24 @@ public class RecipeController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<RecipeDto> getAllRecipes(PaginationDto paginationDto) {
+    public List<RecipeDto> getAllRecipes(@Valid PaginationDto paginationDto) {
         Pageable pageable = PageRequest.of(paginationDto.getPage(), paginationDto.getSize());
         List<Recipe> recipes = recipeService.getAllRecipes(pageable);
         return recipes.stream().map(recipeDtoMapper::toDto).toList();
     }
 
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<RecipeDto> searchRecipes(RecipeSearchDto searchDto) {
+    public List<RecipeDto> searchRecipes(@Valid PageableRecipeSearchDto searchDto) {
         Pageable pageable = PageRequest.of(searchDto.getPage(), searchDto.getSize());
         RecipeSearch recipeSearch = recipeDtoMapper.toRecipeSearch(searchDto);
         return recipeService.searchRecipes(recipeSearch, pageable).stream()
                 .map(recipeDtoMapper::toDto)
                 .toList();
+    }
+
+    @GetMapping(value = "/count", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Long countRecipes(@Valid RecipeSearchDto searchDto) {
+        RecipeSearch recipeSearch = recipeDtoMapper.toRecipeSearch(searchDto);
+        return recipeService.countRecipes(recipeSearch);
     }
 }
