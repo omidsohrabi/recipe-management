@@ -1,5 +1,6 @@
 package com.abn.recipe.service;
 
+import com.abn.recipe.domain.exception.DuplicateRecipeException;
 import com.abn.recipe.domain.model.RecipeSearch;
 import com.abn.recipe.domain.exception.RecipeNotFoundException;
 import com.abn.recipe.domain.mapper.RecipeAdapter;
@@ -29,6 +30,9 @@ public class RecipeService {
 
     @Transactional
     public long saveRecipe(Recipe recipe) {
+        if (recipeRepository.existsByName(recipe.getName())) {
+            throw new DuplicateRecipeException(recipe.getName());
+        }
         RecipeEntity recipeEntity = recipeAdapter.toEntity(recipe);
         return recipeRepository.save(recipeEntity).getId();
     }
@@ -45,6 +49,9 @@ public class RecipeService {
     public void updateRecipe(Long id, Recipe recipe) {
         if (!recipeRepository.existsById(id)) {
             throw new RecipeNotFoundException(id);
+        }
+        if (recipeRepository.existsByNameAndIdNot(recipe.getName(), id)) {
+            throw new DuplicateRecipeException(recipe.getName());
         }
         RecipeEntity recipeEntity = recipeAdapter.toEntity(recipe);
         recipeEntity.setId(id);

@@ -1,5 +1,6 @@
 package com.abn.recipe.api.exception;
 
+import com.abn.recipe.domain.exception.DuplicateRecipeException;
 import com.abn.recipe.domain.exception.RecipeNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -18,6 +19,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleRecipeNotFoundException(RecipeNotFoundException ex) {
         log.error(ex.getMessage());
         return buildResponse(HttpStatus.NOT_FOUND, ErrorCode.RECIPE_NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateRecipeException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateRequestException(DuplicateRecipeException ex) {
+        log.error(ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST, ErrorCode.DUPLICATE_RECIPE_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

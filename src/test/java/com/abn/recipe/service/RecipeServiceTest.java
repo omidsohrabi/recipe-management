@@ -1,5 +1,6 @@
 package com.abn.recipe.service;
 
+import com.abn.recipe.domain.exception.DuplicateRecipeException;
 import com.abn.recipe.domain.exception.RecipeNotFoundException;
 import com.abn.recipe.domain.mapper.RecipeAdapter;
 import com.abn.recipe.domain.model.Recipe;
@@ -40,14 +41,24 @@ class RecipeServiceTest {
 
     @Test
     void saveRecipe_shouldSaveAndReturnId() {
+        when(recipeRepository.existsByName(sampleRecipe.getName())).thenReturn(false);
         when(recipeAdapter.toEntity(any())).thenReturn(sampleRecipeEntity);
         when(recipeRepository.save(any(RecipeEntity.class))).thenReturn(sampleRecipeEntity);
 
         long id = recipeService.saveRecipe(sampleRecipe);
 
         assertEquals(1L, id);
+        verify(recipeRepository).existsByName(sampleRecipe.getName());
         verify(recipeAdapter).toEntity(sampleRecipe);
         verify(recipeRepository).save(sampleRecipeEntity);
+    }
+
+    @Test
+    void saveRecipe_shouldThrowExceptionWhenRecipeExists() {
+        when(recipeRepository.existsByName(sampleRecipe.getName())).thenReturn(true);
+
+        assertThrows(DuplicateRecipeException.class, () -> recipeService.saveRecipe(sampleRecipe));
+        verify(recipeRepository).existsByName(sampleRecipe.getName());
     }
 
     @Test
@@ -64,7 +75,7 @@ class RecipeServiceTest {
 
     @Test
     void getRecipeById_shouldThrowExceptionWhenNotFound() {
-        when(recipeRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(recipeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(RecipeNotFoundException.class, () -> recipeService.getRecipeById(1L));
         verify(recipeRepository).findById(1L);
@@ -72,7 +83,8 @@ class RecipeServiceTest {
 
     @Test
     void updateRecipe_shouldUpdateRecipe() {
-        when(recipeRepository.existsById(anyLong())).thenReturn(true);
+        when(recipeRepository.existsById(1L)).thenReturn(true);
+        when(recipeRepository.existsByNameAndIdNot(sampleRecipe.getName(), 1L)).thenReturn(false);
         when(recipeAdapter.toEntity(any(Recipe.class))).thenReturn(sampleRecipeEntity);
 
         recipeService.updateRecipe(1L, sampleRecipe);
@@ -84,10 +96,20 @@ class RecipeServiceTest {
 
     @Test
     void updateRecipe_shouldThrowExceptionWhenNotFound() {
-        when(recipeRepository.existsById(anyLong())).thenReturn(false);
+        when(recipeRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(RecipeNotFoundException.class, () -> recipeService.updateRecipe(1L, sampleRecipe));
         verify(recipeRepository).existsById(1L);
+    }
+
+    @Test
+    void updateRecipe_shouldThrowExceptionWhenRecipeNameExists() {
+        when(recipeRepository.existsById(1L)).thenReturn(true);
+        when(recipeRepository.existsByNameAndIdNot(sampleRecipe.getName(), 1L)).thenReturn(true);
+
+        assertThrows(DuplicateRecipeException.class, () -> recipeService.updateRecipe(1L, sampleRecipe));
+        verify(recipeRepository).existsById(1L);
+        verify(recipeRepository).existsByNameAndIdNot(sampleRecipe.getName(), 1L);
     }
 
     @Test
@@ -102,7 +124,7 @@ class RecipeServiceTest {
 
     @Test
     void deleteRecipe_shouldThrowExceptionWhenNotFound() {
-        when(recipeRepository.existsById(anyLong())).thenReturn(false);
+        when(recipeRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(RecipeNotFoundException.class, () -> recipeService.deleteRecipe(1L));
         verify(recipeRepository).existsById(1L);

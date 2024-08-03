@@ -13,7 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface RecipeRepository extends JpaRepository<RecipeEntity, Long>, JpaSpecificationExecutor<RecipeEntity> {
-
     @EntityGraph(value = "Recipe.ingredients", type = EntityGraph.EntityGraphType.LOAD)
     @Nonnull Optional<RecipeEntity> findById(@Nonnull Long id);
 
@@ -22,5 +21,9 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long>, Jpa
 
     @EntityGraph(value = "Recipe.ingredients", type = EntityGraph.EntityGraphType.LOAD)
     @Nonnull Page<RecipeEntity> findAll(Specification<RecipeEntity> spec, @Nonnull Pageable pageable);
+
+    boolean existsByName(@Nonnull String name);
+
+    boolean existsByNameAndIdNot(@Nonnull String name, @Nonnull Long id);
 
 }
