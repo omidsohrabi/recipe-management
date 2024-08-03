@@ -55,3 +55,8 @@ The Onion Architecture is used to achieve a clean separation of concerns, making
 4. **Access the API Documentation**
 
     Once the application is running, you can access the API documentation at http://localhost:8080/swagger-ui.html.
+
+5. **Access the H2 Console**
+
+    The application uses an in-memory H2 database by default. The configuration is specified in the `application.properties` file located in `src/main/resources`
+    <br>You can access the H2 console at http://localhost:8080/h2-console.
